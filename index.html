@@ -335,6 +335,14 @@ pre.code code{font-family:inherit;white-space:pre}
   body.rail-mini .themeseg button{border-right:0;border-bottom:1px solid var(--line);padding:9px 2px}
   body.rail-mini .themeseg button:last-child{border-bottom:0}
 }
+
+.syncline{font-size:12px;color:var(--muted);margin:2px 0 10px;display:flex;align-items:center;gap:6px}
+.syncline[hidden]{display:none}
+.syncline::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--muted);flex:none}
+.syncline.ok::before{background:var(--good)}
+.syncline.saving::before{background:var(--warn)}
+.syncline.off::before{background:var(--bad)}
+@media (min-width:901px){body.rail-mini .syncline{display:none}}
 @media (max-width:560px){
   .hop{grid-template-columns:minmax(0,1fr) 56px}
   .hop input{grid-column:1/-1;grid-row:2}
@@ -2493,6 +2501,55 @@ function isDone(m){var s=quizState[m.id];return !!s&&m.quiz.every(function(_,i){
 function drillDone(d){var st=drillStats[d.id];return !!st&&(d.type==='case'?st.tries>0:st.ok>0);}
 function doneDrills(){return Object.keys(DMAP).filter(function(k){return drillDone(DMAP[k])}).length;}
 
+/* ---------- Cloud sync (works when the page is served with /api/progress; otherwise stays local) ---------- */
+var SYNC_KEYS=['arch.quiz','arch.drill','arch.last','arch.theme'];
+var syncState='idle',syncTimer=null,syncBusy=false,syncLastPull=0,rawSet=store.set;
+function syncLabel(){return syncState==='ok'?'Progress synced to your account':syncState==='saving'?'Saving your progress':syncState==='off'?'Offline: saved on this device only':'';}
+function setSync(st){syncState=st;var el=document.getElementById('syncline');if(el){el.textContent=syncLabel();el.className='syncline '+st;el.hidden=!syncLabel();}}
+function syncSnapshot(){var o={};SYNC_KEYS.forEach(function(k){var v=store.get(k,undefined);if(v!==undefined)o[k]=v;});return o;}
+function syncMark(){rawSet('arch.ts',Date.now());setSync('saving');clearTimeout(syncTimer);syncTimer=setTimeout(function(){syncPush(false)},1200);}
+store.set=function(k,v){rawSet(k,v);if(SYNC_KEYS.indexOf(k)>-1)syncMark();};
+function syncFetch(url,opt,ms){
+  return new Promise(function(resolve,reject){
+    var done=false,t=setTimeout(function(){if(!done){done=true;reject(new Error('timeout'))}},ms||8000);
+    fetch(url,opt).then(function(r){if(done)return;done=true;clearTimeout(t);resolve(r)},function(e){if(done)return;done=true;clearTimeout(t);reject(e)});
+  });
+}
+function syncPush(keep){
+  clearTimeout(syncTimer);
+  var body=JSON.stringify({ts:store.get('arch.ts',Date.now()),data:syncSnapshot()});
+  setSync('saving');
+  syncFetch('/api/progress',{method:'PUT',headers:{'Content-Type':'application/json'},body:body,keepalive:!!keep&&body.length<60000},8000)
+    .then(function(r){setSync(r.ok?'ok':'off')},function(){setSync('off')});
+}
+function syncApply(remote){
+  SYNC_KEYS.forEach(function(k){if(remote.data&&k in remote.data)rawSet(k,remote.data[k]);});
+  rawSet('arch.ts',remote.ts);
+  quizState=store.get('arch.quiz',{});drillStats=store.get('arch.drill',{});
+  applyTheme(getTheme());renderRail();
+  try{show(cur);}catch(e){}
+}
+function syncPull(){
+  if(syncBusy)return;syncBusy=true;syncLastPull=Date.now();
+  syncFetch('/api/progress',{cache:'no-store'},8000).then(function(r){
+    if(!r.ok)throw new Error('http');return r.json();
+  }).then(function(remote){
+    syncBusy=false;
+    if(!remote||typeof remote.ts!=='number'){setSync('off');return;}
+    var lts=store.get('arch.ts',0);
+    var hasLocal=Object.keys(store.get('arch.quiz',{})).length>0||Object.keys(store.get('arch.drill',{})).length>0;
+    if(remote.ts>lts){syncApply(remote);setSync('ok');}
+    else if(lts>remote.ts){syncPush(false);}
+    else if(remote.ts===0&&hasLocal){syncMark();}
+    else setSync('ok');
+  }).catch(function(){syncBusy=false;setSync('off');});
+}
+document.addEventListener('visibilitychange',function(){
+  if(document.visibilityState==='hidden'){if(syncState==='saving')syncPush(true);}
+  else if(Date.now()-syncLastPull>15000)syncPull();
+});
+window.addEventListener('pagehide',function(){if(syncState==='saving')syncPush(true);});
+
 /* ---------- theme ---------- */
 function getTheme(){var t=store.get('arch.theme','system');return (t==='light'||t==='dark')?t:'system';}
 function applyTheme(t){
@@ -2522,6 +2579,7 @@ function renderRail(){
   '<button class="railtoggle" data-railtoggle aria-expanded="'+(mini?'false':'true')+'" aria-label="'+(mini?'Expand the sidebar':'Collapse the sidebar')+'" title="'+(mini?'Expand the sidebar':'Collapse the sidebar')+'"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3L5 8l5 5"/></svg></button></div>'+
   '<div class="prog"><div class="prog-top"><span>Quizzes finished</span><span>'+done+' of '+MODS.length+'</span></div><div class="meter"><i style="width:'+(done/MODS.length*100)+'%"></i></div></div>'+
   '<div class="prog"><div class="prog-top"><span>Drills done</span><span>'+dd+' of '+TOTAL_DRILLS+'</span></div><div class="meter"><i style="width:'+(TOTAL_DRILLS?dd/TOTAL_DRILLS*100:0)+'%"></i></div></div>'+
+  '<div class="syncline '+syncState+'" id="syncline"'+(syncLabel()?'':' hidden')+' role="status">'+esc(syncLabel())+'</div>'+
   '<nav class="nav" aria-label="Modules">'+
   item('map','MAP','Overview')+
   MODS.map(function(m){return item(m.id,'M'+m.n,'Module '+m.n+': '+m.title).replace('<span class="nl">Module '+m.n+': ','<span class="nl">')+'';}).map(function(h,i){return isDone(MODS[i])?h.replace('</a>','<span class="tick" aria-label="quiz finished">&#10003;</span></a>'):h;}).join('')+
@@ -2890,5 +2948,6 @@ applyTheme(getTheme());
 if(store.get('arch.rail','open')==='mini')document.body.classList.add('rail-mini');
 var start=(location.hash||'').slice(1);
 show(VALID[start]?start:'map');
+syncPull();
 })();
 </script>
