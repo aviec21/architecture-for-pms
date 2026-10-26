@@ -1,5 +1,13 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="An interactive course on systems architecture for product managers: front end, APIs, data, infrastructure, security, ML, LLMs and agents.">
+<meta name="theme-color" content="#F2F5F8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0E161F" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231B4FD6'/%3E%3Ctext x='16' y='22' font-family='Arial' font-weight='700' font-size='15' text-anchor='middle' fill='white'%3EPM%3C/text%3E%3C/svg%3E">
 <title>Architecture for PMs</title>
-<meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=Schibsted+Grotesk:wght@400;500;600&display=swap">
 <script>try{var __t=JSON.parse(localStorage.getItem("arch.theme"));if(__t==="light"||__t==="dark")document.documentElement.setAttribute("data-theme",__t)}catch(e){}</script>
 <style>
@@ -343,6 +351,54 @@ pre.code code{font-family:inherit;white-space:pre}
 .syncline.saving::before{background:var(--warn)}
 .syncline.off::before{background:var(--bad)}
 @media (min-width:901px){body.rail-mini .syncline{display:none}}
+
+/* ---- phone and small tablet refinements ---- */
+.mobbar{display:none}
+.jumpsel{min-width:0}
+@media (max-width:900px){
+  .mobbar{display:flex;align-items:center;gap:10px;position:fixed;top:0;left:0;right:0;z-index:15;background:var(--surface);border-bottom:1px solid var(--line);padding:calc(8px + env(safe-area-inset-top,0px)) max(12px,env(safe-area-inset-right,0px)) 8px max(12px,env(safe-area-inset-left,0px))}
+  .menubtn{position:static;display:flex;flex:none;min-height:40px;box-shadow:none;border-radius:8px;padding:0 12px;background:var(--bg)}
+  .jumpsel{flex:1 1 auto;min-height:40px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--fg);font:inherit;font-size:15px;padding:0 10px;width:100%;max-width:100%}
+  .jumpsel[hidden]{display:none}
+  .spy{display:none!important}
+  body.has-spy{--spy-w:0px}
+  main{padding-top:calc(44px + env(safe-area-inset-top,0px))}
+  .themeseg button{min-height:42px}
+  .nav a{min-height:44px;display:flex;align-items:center}
+}
+@media (max-width:600px){
+  body{line-height:1.5}
+  .deepb{padding:14px;border-radius:10px}
+  .opt{padding:12px}
+  label.chk{padding:12px;min-height:44px}
+  .reslist a{display:inline-block;padding:4px 0}
+  .tablewrap:has(table.rt){border:0;background:transparent;overflow:visible}
+  table.rt,table.rt tbody,table.rt tr,table.rt td{display:block;width:100%;min-width:0}
+  table.rt thead{display:none}
+  table.rt tr{border:1px solid var(--line);border-radius:10px;background:var(--surface);margin:0 0 10px;padding:6px 0}
+  table.rt td{border:0;padding:6px 14px;display:grid;grid-template-columns:96px minmax(0,1fr);gap:10px;font-size:15px}
+  table.rt td::before{content:attr(data-label);font-family:var(--font-mono);font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);padding-top:3px}
+  table.rt td:first-child{display:block;font-weight:700;font-size:16px;padding-top:8px;border-bottom:1px dashed var(--line);margin-bottom:2px}
+  table.rt td:first-child::before{display:none}
+  .sowhat{font-size:15px}
+  pre.code{font-size:12px}
+}
+
+/* ---- stable layout: numbers keep their width, buttons keep their place ---- */
+output,.stat b,.dcount,.prog-top span,.hop output,.slide output,td,.state{font-variant-numeric:tabular-nums}
+.slide output,.hop output{display:inline-block;min-width:3.8em;text-align:right}
+@media (min-width:561px){.slide{grid-template-columns:minmax(0,1fr) 150px 60px!important}}
+@media (max-width:560px){.slide{grid-template-columns:minmax(0,1fr) 60px!important}}
+.dcount{min-width:11ch;text-align:right;white-space:nowrap}
+.drill .btn,.drill button.btn{min-width:112px}
+.drill .row{align-items:flex-end}
+.field:has(input[type=range]){flex:0 0 240px;width:240px;max-width:100%}
+.field input[type=range]{width:100%}
+.field b,.field output{font-variant-numeric:tabular-nums}
+.qsum{flex-wrap:nowrap!important;align-items:center;min-height:56px}
+.qsum strong{flex:1 1 auto;min-width:0;font-variant-numeric:tabular-nums}
+.qsum .btn{flex:none;white-space:nowrap}
+table.rt td,.deepb p,.deeplist li{overflow-wrap:anywhere}
 @media (max-width:560px){
   .hop{grid-template-columns:minmax(0,1fr) 56px}
   .hop input{grid-column:1/-1;grid-row:2}
@@ -353,8 +409,9 @@ pre.code code{font-family:inherit;white-space:pre}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
-
-<button class="menubtn" id="menuBtn" data-railopen aria-label="Open the module menu" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 5h12M3 9h12M3 13h12"/></svg><span>Modules</span></button>
+</head>
+<body>
+<header class="mobbar" id="mobbar"><button class="menubtn" id="menuBtn" data-railopen aria-label="Open the module menu" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 5h12M3 9h12M3 13h12"/></svg><span>Modules</span></button><select id="jumpsel" class="jumpsel" aria-label="Jump to a section on this page" hidden></select></header>
 <div class="scrim" id="scrim" data-railclose></div>
 <aside class="rail" id="rail" aria-label="Course navigation"></aside>
 <nav class="spy" id="spy" aria-label="On this page" hidden></nav>
@@ -2597,7 +2654,7 @@ function termCard(t){
   return '<div class="tcard" data-term="'+esc((t[0]+' '+t[1]+' '+t[2]+' '+(t[3]||'')).toLowerCase())+'"><div class="thead"><b>'+esc(t[0])+'</b>'+(t[1]?'<small>'+esc(t[1])+'</small>':'')+'</div><p class="tp">'+esc(t[2])+'</p>'+(t[3]?'<p class="te"><span>Example</span>'+esc(t[3])+'</p>':'')+'</div>';
 }
 function tableHTML(t){
-  return '<h3 class="tt">'+esc(t.title)+'</h3><div class="tablewrap"><table><thead><tr>'+t.head.map(function(h){return '<th>'+esc(h)+'</th>'}).join('')+'</tr></thead><tbody>'+t.rows.map(function(r){return '<tr>'+r.map(function(c){return '<td>'+esc(c)+'</td>'}).join('')+'</tr>'}).join('')+'</tbody></table></div>';
+  return '<h3 class="tt">'+esc(t.title)+'</h3><div class="tablewrap"><table class="rt"><thead><tr>'+t.head.map(function(h){return '<th>'+esc(h)+'</th>'}).join('')+'</tr></thead><tbody>'+t.rows.map(function(r){return '<tr>'+r.map(function(c,i){return '<td data-label="'+esc(t.head[i]||'')+'">'+esc(c)+'</td>'}).join('')+'</tr>'}).join('')+'</tbody></table></div>';
 }
 function caseHTML(c){
   return '<div class="case"><h3>'+esc(c.t)+'</h3><p>'+esc(c.b)+'</p><p class="src">Source: '+(c.u?link(c.u,c.src):esc(c.src))+'</p></div>';
@@ -2610,7 +2667,7 @@ function deepBlock(b){
   (b.p||[]).forEach(function(x){h+='<p>'+esc(x)+'</p>'});
   if(b.list)h+='<ul class="deeplist">'+b.list.map(function(x){return '<li>'+esc(x)+'</li>'}).join('')+'</ul>';
   if(b.code)h+='<div class="codewrap"><div class="codelab">'+esc(b.code.label)+'</div><pre class="code"><code>'+esc(b.code.text)+'</code></pre></div>';
-  if(b.table)h+='<div class="tablewrap"><table><thead><tr>'+b.table.head.map(function(x){return '<th>'+esc(x)+'</th>'}).join('')+'</tr></thead><tbody>'+b.table.rows.map(function(r){return '<tr>'+r.map(function(c){return '<td>'+esc(c)+'</td>'}).join('')+'</tr>'}).join('')+'</tbody></table></div>';
+  if(b.table)h+='<div class="tablewrap"><table class="rt"><thead><tr>'+b.table.head.map(function(x){return '<th>'+esc(x)+'</th>'}).join('')+'</tr></thead><tbody>'+b.table.rows.map(function(r){return '<tr>'+r.map(function(c,i){return '<td data-label="'+esc(b.table.head[i]||'')+'">'+esc(c)+'</td>'}).join('')+'</tr>'}).join('')+'</tbody></table></div>';
   if(b.so)h+='<p class="sowhat"><span>PM takeaway</span>'+esc(b.so)+'</p>';
   return h+'</article>';
 }
@@ -2649,7 +2706,7 @@ function renderQuiz(m){
   var root=$('#quizroot');if(!root)return;
   var st=quizState[m.id]||{},answered=0,correct=0;
   m.quiz.forEach(function(x,i){if(st[i]!==undefined){answered++;if(st[i]===x.a)correct++;}});
-  root.innerHTML='<div class="qsum"><strong>'+(answered===m.quiz.length?'Score: '+correct+' of '+m.quiz.length:'Answer all '+m.quiz.length+' questions ('+answered+' done)')+'</strong>'+(answered?'<button class="btn ghost" data-qreset>Reset this quiz</button>':'')+'</div>'+
+  root.innerHTML='<div class="qsum"><strong>'+(answered===m.quiz.length?'Score: '+correct+' of '+m.quiz.length:'Answered '+answered+' of '+m.quiz.length)+'</strong>'+'<button class="btn ghost" data-qreset'+(answered?'':' disabled tabindex="-1" aria-hidden="true" style="visibility:hidden"')+'>Reset this quiz</button>'+'</div>'+
   m.quiz.map(function(x,i){return qCardHTML(m.id+':'+i,x,modGetA,i+1)}).join('');
 }
 
@@ -2696,6 +2753,7 @@ function dbadge(d){return d.type==='num'?'Calculate':(d.type==='pick'?'Tick the 
 function drawDrill(d){
   var el=document.getElementById('drill-'+d.id);if(!el)return;
   var s=dstateOf(d),st=drillStats[d.id]||{ok:0,tries:0},h='';
+  var oldq=el.querySelector('.dq'),oldh=oldq?oldq.offsetHeight:0;
   h+='<div class="dhead"><b>'+esc(d.title)+'</b><span class="badge">'+dbadge(d)+'</span><span class="dcount">'+(d.type==='case'?'Attempted '+st.tries+'x':'Solved '+st.ok+'x')+'</span></div>';
   if(d.type==='num'){
     var inst=s.inst;
@@ -2707,15 +2765,36 @@ function drawDrill(d){
   } else if(d.type==='pick'){
     h+='<p class="dq">'+esc(d.q)+'</p><div class="pickgrid">'+s.order.map(function(i){
       var it=d.items[i],on=!!s.picks[i],cls='chk';if(s.checked)cls+=(on===it.c)?' right':' wrong';
-      return '<label class="'+cls+'" for="pk-'+d.id+'-'+i+'"><input type="checkbox" id="pk-'+d.id+'-'+i+'" data-pk="'+d.id+'" data-i="'+i+'"'+(on?' checked':'')+(s.checked?' disabled':'')+'><span>'+esc(it.t)+(s.checked?'<br><span class="hint" style="margin:0">'+(on===it.c?'Right. ':'Not quite. ')+esc(it.w)+'</span>':'')+'</span></label>';
+      return '<label class="'+cls+'" for="pk-'+d.id+'-'+i+'"><input type="checkbox" id="pk-'+d.id+'-'+i+'" data-pk="'+d.id+'" data-i="'+i+'"'+(on?' checked':'')+(s.checked?' disabled':'')+'><span>'+esc(it.t)+'</span></label>';
     }).join('')+'</div><div class="row">'+(s.checked?'<button class="btn" data-d="new" data-id="'+d.id+'">Try again</button>':'<button class="btn" data-d="check" data-id="'+d.id+'">Check</button>')+'</div>';
-    if(s.checked)h+='<p class="fb '+(s.ok?'good':'warn')+'">'+esc(s.fb)+'</p>';
+    if(s.checked){h+='<p class="fb '+(s.ok?'good':'warn')+'">'+esc(s.fb)+'</p><div class="result"><p><strong>Why, item by item</strong></p><ul class="deeplist">'+s.order.map(function(i){var it=d.items[i],on=!!s.picks[i];return '<li><strong>'+esc(it.t)+'</strong>: '+(on===it.c?'Right. ':'Not quite. ')+esc(it.w)+'</li>';}).join('')+'</ul></div>';}
   } else {
     var n=0;d.rubric.forEach(function(_,i){if(s.rub[i])n++;});
     h+='<p class="dq">'+esc(d.q)+'</p><label class="field" style="width:100%"><span>Write your answer first, then compare with the model answer</span><textarea id="dt-'+d.id+'" data-dt="'+d.id+'" rows="5">'+esc(s.text||'')+'</textarea></label><div class="row" style="margin-top:10px"><button class="btn" data-d="reveal" data-id="'+d.id+'">'+(s.shown?'Hide model answer':'Show model answer')+'</button></div>';
     if(s.shown)h+='<div class="result"><p><strong>Model answer</strong></p><p>'+esc(d.model)+'</p><p><strong>Self-check: did your answer cover these?</strong></p>'+d.rubric.map(function(r,i){return '<label class="chk" for="dr-'+d.id+'-'+i+'" style="margin-bottom:6px"><input type="checkbox" id="dr-'+d.id+'-'+i+'" data-rb="'+d.id+'" data-i="'+i+'"'+(s.rub[i]?' checked':'')+'><span>'+esc(r)+'</span></label>'}).join('')+'<p class="readout">Covered '+n+' of '+d.rubric.length+'. '+(n===d.rubric.length?'Strong answer.':(n>=d.rubric.length-1?'Close. Add the missing point and try phrasing it aloud.':'Rewrite your answer with the points you missed.'))+'</p></div>';
   }
   el.innerHTML=h;
+  reserveQ(d,el,oldh);
+}
+function reserveQ(d,el,oldh){
+  var nq=el.querySelector('.dq');if(!nq)return;
+  if(d.type==='num'){
+    if(!nq.offsetHeight&&!oldh)return;
+    var mx=oldh||0;
+    try{
+      nq.style.minHeight='0px';
+      var probe=nq.cloneNode(false);probe.style.cssText='position:absolute;visibility:hidden;left:0;right:0;min-height:0;margin:0';
+      nq.parentNode.insertBefore(probe,nq);
+      mx=Math.max(mx,nq.offsetHeight);
+      for(var k=0;k<14;k++){probe.textContent=d.gen(R).q;mx=Math.max(mx,probe.offsetHeight);}
+      nq.parentNode.removeChild(probe);
+    }catch(e){}
+    if(mx)nq.style.minHeight=mx+'px';
+  }else if(oldh){nq.style.minHeight=oldh+'px';}
+}
+function reserveAllQ(){
+  var m=modById(cur);if(!m||!m.drills)return;
+  m.drills.forEach(function(d){var el=document.getElementById('drill-'+d.id);if(el)reserveQ(d,el,0);});
 }
 function bump(d,ok){
   var st=drillStats[d.id]||{ok:0,tries:0};st.tries++;if(ok)st.ok++;drillStats[d.id]=st;store.set('arch.drill',drillStats);
@@ -2834,13 +2913,15 @@ function spyItemsFor(){
 function spySetup(){
   var nav=$('#spy');if(!nav)return;
   spyList=spyItemsFor();
-  if(!spyList.length){nav.hidden=true;nav.innerHTML='';document.body.classList.remove('has-spy');return;}
+  if(!spyList.length){nav.hidden=true;nav.innerHTML='';document.body.classList.remove('has-spy');var j0=document.getElementById('jumpsel');if(j0){j0.innerHTML='';j0.hidden=true;}return;}
   nav.hidden=false;document.body.classList.add('has-spy');
+  var js=document.getElementById('jumpsel');if(js){js.innerHTML=spyList.map(function(s){return '<option value="'+s[0]+'">'+esc(s[1])+'</option>'}).join('');js.hidden=false;}
   nav.innerHTML='<ul>'+spyList.map(function(s){return '<li><button class="spy-b" data-spy="'+s[0]+'" aria-label="Jump to '+esc(s[1])+'"><span class="spy-l">'+esc(s[1])+'</span><span class="spy-d"></span></button></li>'}).join('')+'</ul>';
   spyActive='';spyUpdate();
 }
 function setSpy(id){
   if(id===spyActive)return;spyActive=id;
+  var js2=document.getElementById('jumpsel');if(js2&&js2.value!==id)js2.value=id;
   $$('.spy-b').forEach(function(b){var on=b.dataset.spy===id;b.classList.toggle('on',on);if(on)b.setAttribute('aria-current','true');else b.removeAttribute('aria-current');});
 }
 function spyUpdate(){
@@ -2859,7 +2940,8 @@ function spyJump(id){
   var el=document.getElementById(id);if(!el)return;
   setSpy(id);spyLock=Date.now()+900;
   var r=el.getBoundingClientRect(),h=r.height,vh=window.innerHeight;
-  var y=h<vh-80?r.top+window.pageYOffset+h/2-vh/2:r.top+window.pageYOffset-20;
+  var off=window.innerWidth<=900?76:20;
+  var y=h<vh-120?r.top+window.pageYOffset+h/2-vh/2:r.top+window.pageYOffset-off;
   try{window.scrollTo({top:Math.max(0,y),behavior:'smooth'});}catch(x){try{window.scrollTo(0,Math.max(0,y));}catch(z){}}
   setTimeout(spyUpdate,950);
 }
@@ -2869,6 +2951,7 @@ function onScroll(){
 }
 window.addEventListener('scroll',onScroll,{passive:true});
 window.addEventListener('resize',onScroll);
+var rzT=null;window.addEventListener('resize',function(){clearTimeout(rzT);rzT=setTimeout(function(){if(tab==='practice')reserveAllQ();},250);});
 
 /* ---------- Mobile drawer ---------- */
 function setDrawer(open){
@@ -2909,6 +2992,7 @@ document.addEventListener('click',function(e){
     $$('.tab').forEach(function(b){var on=b.dataset.tab===tab;b.classList.toggle('on',on);b.setAttribute('aria-selected',on?'true':'false')});
     $$('.panel').forEach(function(p){p.hidden=p.dataset.panel!==tab});
     spySetup();
+    if(tab==='practice')reserveAllQ();
     return;
   }
   var o=e.target.closest('[data-qk]');
@@ -2933,6 +3017,7 @@ document.addEventListener('input',function(e){
 });
 document.addEventListener('change',function(e){
   var t=e.target;if(!t.dataset)return;
+  if(t.id==='jumpsel'){spyJump(t.value);return;}
   if(t.dataset.pk){var d=DMAP[t.dataset.pk];if(d)dstateOf(d).picks[+t.dataset.i]=t.checked;return;}
   if(t.dataset.rb){var d3=DMAP[t.dataset.rb];if(d3){dstateOf(d3).rub[+t.dataset.i]=t.checked;drawDrill(d3);}}
 });
@@ -2951,3 +3036,5 @@ show(VALID[start]?start:'map');
 syncPull();
 })();
 </script>
+</body>
+</html>
