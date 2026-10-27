@@ -2559,12 +2559,14 @@ function drillDone(d){var st=drillStats[d.id];return !!st&&(d.type==='case'?st.t
 function doneDrills(){return Object.keys(DMAP).filter(function(k){return drillDone(DMAP[k])}).length;}
 
 /* ---------- Cloud sync (works when the page is served with /api/progress; otherwise stays local) ---------- */
-var SYNC_KEYS=['arch.quiz','arch.drill','arch.last','arch.theme'];
+var SYNC_KEYS=['arch.quiz','arch.drill'];
+var syncReady=false;
+function hasProg(o){if(!o)return false;var q=o['arch.quiz'],dr=o['arch.drill'];return !!((q&&Object.keys(q).length)||(dr&&Object.keys(dr).length));}
 var syncState='idle',syncTimer=null,syncBusy=false,syncLastPull=0,rawSet=store.set;
 function syncLabel(){return syncState==='ok'?'Progress synced to your account':syncState==='saving'?'Saving your progress':syncState==='off'?'Offline: saved on this device only':'';}
 function setSync(st){syncState=st;var el=document.getElementById('syncline');if(el){el.textContent=syncLabel();el.className='syncline '+st;el.hidden=!syncLabel();}}
 function syncSnapshot(){var o={};SYNC_KEYS.forEach(function(k){var v=store.get(k,undefined);if(v!==undefined)o[k]=v;});return o;}
-function syncMark(){rawSet('arch.ts',Date.now());setSync('saving');clearTimeout(syncTimer);syncTimer=setTimeout(function(){syncPush(false)},1200);}
+function syncMark(){rawSet('arch.ts',Date.now());if(!syncReady)return;setSync('saving');clearTimeout(syncTimer);syncTimer=setTimeout(function(){syncPush(false)},1200);}
 store.set=function(k,v){rawSet(k,v);if(SYNC_KEYS.indexOf(k)>-1)syncMark();};
 function syncFetch(url,opt,ms){
   return new Promise(function(resolve,reject){
@@ -2591,15 +2593,15 @@ function syncPull(){
   syncFetch('/api/progress',{cache:'no-store'},8000).then(function(r){
     if(!r.ok)throw new Error('http');return r.json();
   }).then(function(remote){
-    syncBusy=false;
+    syncBusy=false;syncReady=true;
     if(!remote||typeof remote.ts!=='number'){setSync('off');return;}
-    var lts=store.get('arch.ts',0);
-    var hasLocal=Object.keys(store.get('arch.quiz',{})).length>0||Object.keys(store.get('arch.drill',{})).length>0;
-    if(remote.ts>lts){syncApply(remote);setSync('ok');}
+    var lts=store.get('arch.ts',0),rHas=hasProg(remote.data),lHas=hasProg(syncSnapshot());
+    if(!lHas&&rHas){syncApply(remote);setSync('ok');}
+    else if(lHas&&!rHas){rawSet('arch.ts',Date.now());syncPush(false);}
+    else if(remote.ts>lts){syncApply(remote);setSync('ok');}
     else if(lts>remote.ts){syncPush(false);}
-    else if(remote.ts===0&&hasLocal){syncMark();}
     else setSync('ok');
-  }).catch(function(){syncBusy=false;setSync('off');});
+  }).catch(function(){syncBusy=false;syncReady=true;setSync('off');});
 }
 document.addEventListener('visibilitychange',function(){
   if(document.visibilityState==='hidden'){if(syncState==='saving')syncPush(true);}
